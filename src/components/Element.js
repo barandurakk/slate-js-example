@@ -48,6 +48,7 @@ const Element = (props) => {
             height: EMPTY_PAGE.height,
             backgroundColor: "white",
             padding: EMPTY_PAGE.padding,
+            border: `${EMPTY_PAGE.borderWidth}px solid ${EMPTY_PAGE.borderColor}`,
             margin: "0rem 0rem",
           }}
         >

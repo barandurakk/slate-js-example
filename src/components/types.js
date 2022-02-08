@@ -18,9 +18,11 @@ export const defaultFontSize = FONT_OPTIONS.find((opt) => opt.isDefault);
 
 export const EMPTY_PAGE = {
   type: "page",
-  padding: 25,
+  padding: 50,
   width: 764,
   height: 1123,
+  borderColor: "#000",
+  borderWidth: 1,
   children: [
     {
       type: "paragraph",
