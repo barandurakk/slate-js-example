@@ -32,6 +32,7 @@ const Variable = (props) => {
             backgroundColor: props.element.styles.container.backgroundColor,
             boxShadow: selected && focused ? "0 0 0 3px #B4D5FF" : "none",
             cursor: "pointer",
+            padding: "0px 5px",
             borderRadius: "10px",
             color: "white",
             margin: "0px 5px",

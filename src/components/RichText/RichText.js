@@ -15,40 +15,13 @@ import {
   BLOCK_FORMATS,
   COLOR_OPTIONS,
   CUSTOM_FORMATS,
-  CUSTOM_TYPES,
+  EMPTY_PAGE,
   FONT_OPTIONS,
   INLINE_FORMATS,
 } from "../types";
 import HoveringToolbar from "../HoveringToolbar";
-//import { withHistory } from "slate-history";
 
-// const initialEditorValue = [
-//   {
-//     type: "paragraph",
-//     children: [{ text: "" }],
-//   },
-// ];
-
-const defaultColorOption = COLOR_OPTIONS.find((opt) => opt.isDefault);
-const defaultFontSize = FONT_OPTIONS.find((opt) => opt.isDefault);
-
-const initialEditorValue = [
-  {
-    type: "page",
-    paddingVertical: 15,
-    paddingHorizontal: 15,
-    width: 764,
-    height: getA4Height(794),
-    children: [
-      {
-        type: "paragraph",
-        children: [
-          { text: "", colorized: defaultColorOption.color, fontSize: defaultFontSize.size },
-        ],
-      },
-    ],
-  },
-];
+const initialEditorValue = [EMPTY_PAGE];
 
 const RichText = () => {
   const editor = useMemo(() => withPages(withVariables(withReact(createEditor()))), []);
@@ -72,10 +45,6 @@ const RichText = () => {
   const handleOnPaste = (e) => {
     e.preventDefault();
     const text = e.clipboardData?.getData("text");
-    console.log(
-      text,
-      "YES, this text was pasted but i need to insert the page break so i disabled it for now, WORK IN PROGRESS"
-    );
     if (text) {
       Transforms.insertText(editor, text);
     }
@@ -87,7 +56,6 @@ const RichText = () => {
       value={value}
       onChange={(value) => {
         console.log("VALUE: ", value);
-        // setDefaultMarks(editor);
         setValue(value);
       }}
     >
@@ -109,20 +77,12 @@ const RichText = () => {
           <FontButton format={sizeBtn.format} text={sizeBtn.text} size={sizeBtn.size} />
         ))}
       </div>
-      <div className="page-wrapper" style={{ height: getA4Height(500) }}>
+      <div className="page-wrapper" style={{ height: "100vh" }}>
         <Editable
-          // style={{
-          //   width: 500,
-          //   height: getA4Height(500),
-          //   backgroundColor: "white",
-          //   padding: 15,
-          // }}
           onPaste={handleOnPaste}
-          onClick={() => console.log("clicked!")}
           renderElement={renderElement}
           renderLeaf={renderLeaf}
           onKeyDown={onKeyDown}
-          // placeholder={"Enter some text"}
           autoFocus
         />
       </div>

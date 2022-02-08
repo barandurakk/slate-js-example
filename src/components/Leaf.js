@@ -3,7 +3,6 @@ import React from "react";
 const Leaf = ({ attributes, children, leaf }) => {
   let color = "#000";
   let fontSize = 16;
-  //debugger;
 
   if (leaf.colorized) {
     color = leaf.colorized;

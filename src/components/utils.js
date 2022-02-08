@@ -1,15 +1,8 @@
-import _, { isEqual } from "lodash";
+import _ from "lodash";
 import { Editor, Transforms, Text, Element } from "slate";
 import { Element as SlateElement } from "slate";
 import { ReactEditor } from "slate-react";
-import {
-  CUSTOM_TYPES,
-  LIST_TYPES,
-  COLOR_OPTIONS,
-  FONT_OPTIONS,
-  EMPTY_PAGE,
-  BLOCK_FORMATS,
-} from "./types";
+import { CUSTOM_TYPES, LIST_TYPES, COLOR_OPTIONS, FONT_OPTIONS, EMPTY_PAGE } from "./types";
 
 export const withPages = (editor) => {
   const { normalizeNode } = editor;
@@ -23,32 +16,9 @@ export const withPages = (editor) => {
     }
 
     if (Element.isElement(node)) {
-      //if the node is any kind of block
-      const isBlock = BLOCK_FORMATS.find((bf) => bf.format === node.type);
-      if (isBlock) {
-        Transforms.setNodes(
-          editor,
-          {
-            marginVertical: 10,
-          },
-          { match: (n) => !node.padding && isEqual(n, node) }
-        );
-      }
-
       // if the node is Page
       if (node.type === "page") {
         //setPages atrributes for backend
-        Transforms.setNodes(
-          editor,
-          {
-            paddingVertical: 15,
-            paddingHorizontal: 15,
-            width: 764,
-            height: getA4Height(794),
-          },
-          { match: (n) => !node.padding && isEqual(n, node) }
-        );
-
         let PageNode;
         //afaik pageNode if inserted as new page is not available here as a dom node because it hasnt rendered yet
         try {

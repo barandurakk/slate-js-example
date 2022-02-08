@@ -1,13 +1,13 @@
 import React from "react";
-import { getA4Height } from "./utils";
+import { COLOR_OPTIONS, EMPTY_PAGE, FONT_OPTIONS } from "./types";
 import Variable from "./Variable";
 
 const Element = (props) => {
-  //debugger;
   const { attributes, children, element } = props;
-  let color = "#000";
-  let fontSize = 16;
   let childrenNode = children;
+
+  const defaultColorOption = COLOR_OPTIONS.find((opt) => opt.isDefault);
+  const defaultFontSize = FONT_OPTIONS.find((opt) => opt.isDefault);
 
   if (element.type.includes("variable")) {
     return <Variable {...props} />;
@@ -15,7 +15,11 @@ const Element = (props) => {
 
   switch (element.type) {
     case "bulleted-list":
-      childrenNode = <ul style={{ margin: 0 }}>{children}</ul>;
+      childrenNode = (
+        <ul style={{ margin: 0, fontSize: defaultFontSize.size, color: defaultColorOption.color }}>
+          {children}
+        </ul>
+      );
       break;
     case "heading-one":
       childrenNode = <h1 style={{ margin: 0 }}>{children}</h1>;
@@ -27,7 +31,11 @@ const Element = (props) => {
       childrenNode = <li style={{ margin: 0 }}>{children}</li>;
       break;
     case "numbered-list":
-      childrenNode = <ol style={{ margin: 0 }}>{children}</ol>;
+      childrenNode = (
+        <ol style={{ margin: 0, fontSize: defaultFontSize.size, color: defaultColorOption.color }}>
+          {children}
+        </ol>
+      );
       break;
     case "page":
       return (
@@ -36,10 +44,10 @@ const Element = (props) => {
           {...attributes}
           style={{
             boxSizing: "border-box",
-            width: 794,
-            height: getA4Height(794),
+            width: EMPTY_PAGE.width,
+            height: EMPTY_PAGE.height,
             backgroundColor: "white",
-            padding: 15,
+            padding: EMPTY_PAGE.padding,
             margin: "0rem 0rem",
           }}
         >
@@ -50,7 +58,11 @@ const Element = (props) => {
       break;
   }
 
-  return <div {...attributes}>{childrenNode}</div>;
+  return (
+    <div {...attributes} style={{}}>
+      {childrenNode}
+    </div>
+  );
 };
 
 export default Element;

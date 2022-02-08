@@ -1,11 +1,6 @@
 export const LIST_TYPES = ["numbered-list", "bulleted-list"];
 export const CUSTOM_TYPES = ["name-variable", "tc-variable"];
 
-export const EMPTY_PAGE = {
-  type: "page",
-  children: [{ type: "paragraph", children: [{ type: "text", text: "" }] }],
-};
-
 export const COLOR_OPTIONS = [
   { format: "colorized", color: "#000", text: "Black", isDefault: true },
   { format: "colorized", color: "#fff", text: "White" },
@@ -13,10 +8,33 @@ export const COLOR_OPTIONS = [
 ];
 
 export const FONT_OPTIONS = [
-  { format: "fontSize", size: 8, text: "8pt", isDefault: true },
+  { format: "fontSize", size: 12, text: "12pt", isDefault: true },
   { format: "fontSize", size: 20, text: "18pt" },
   { format: "fontSize", size: 24, text: "20pt" },
 ];
+
+export const defaultColorOption = COLOR_OPTIONS.find((opt) => opt.isDefault);
+export const defaultFontSize = FONT_OPTIONS.find((opt) => opt.isDefault);
+
+export const EMPTY_PAGE = {
+  type: "page",
+  padding: 25,
+  width: 764,
+  height: 1123,
+  children: [
+    {
+      type: "paragraph",
+      children: [
+        {
+          type: "text",
+          text: "",
+          colorized: defaultColorOption.color,
+          fontSize: defaultFontSize.size,
+        },
+      ],
+    },
+  ],
+};
 
 export const INLINE_FORMATS = [
   { format: "bold", text: "Bold" },
