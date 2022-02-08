@@ -1,4 +1,5 @@
 import React from "react";
+import { getA4Height } from "./utils";
 import Variable from "./Variable";
 
 const Element = (props) => {
@@ -6,6 +7,7 @@ const Element = (props) => {
   const { attributes, children, element } = props;
   let color = "#000";
   let fontSize = 16;
+  let childrenNode = children;
 
   if (element.type.includes("variable")) {
     return <Variable {...props} />;
@@ -13,22 +15,42 @@ const Element = (props) => {
 
   switch (element.type) {
     case "bulleted-list":
-      return <ul {...attributes}>{children}</ul>;
+      childrenNode = <ul style={{ margin: 0 }}>{children}</ul>;
+      break;
     case "heading-one":
-      return <h1 {...attributes}>{children}</h1>;
+      childrenNode = <h1 style={{ margin: 0 }}>{children}</h1>;
+      break;
     case "heading-two":
-      return <h2 {...attributes}>{children}</h2>;
+      childrenNode = <h2 style={{ margin: 0 }}>{children}</h2>;
+      break;
     case "list-item":
-      return <li {...attributes}>{children}</li>;
+      childrenNode = <li style={{ margin: 0 }}>{children}</li>;
+      break;
     case "numbered-list":
-      return <ol {...attributes}>{children}</ol>;
-    default:
+      childrenNode = <ol style={{ margin: 0 }}>{children}</ol>;
+      break;
+    case "page":
       return (
-        <p {...attributes} style={{ margin: "3px 0px", color, fontSize: `${fontSize}pt` }}>
+        <div
+          className="page"
+          {...attributes}
+          style={{
+            boxSizing: "border-box",
+            width: 794,
+            height: getA4Height(794),
+            backgroundColor: "white",
+            padding: 15,
+            margin: "0rem 0rem",
+          }}
+        >
           {children}
-        </p>
+        </div>
       );
+    default:
+      break;
   }
+
+  return <div {...attributes}>{childrenNode}</div>;
 };
 
 export default Element;

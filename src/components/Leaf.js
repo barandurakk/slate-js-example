@@ -30,7 +30,7 @@ const Leaf = ({ attributes, children, leaf }) => {
   }
 
   return (
-    <span {...attributes} style={{ color, fontSize: `${fontSize}pt` }}>
+    <span {...attributes} style={{ color, fontSize: `${fontSize}pt`, margin: 0 }}>
       {children}
     </span>
   );
