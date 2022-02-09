@@ -1,5 +1,8 @@
+import { v4 as uuidv4 } from "uuid";
+
 export const LIST_TYPES = ["numbered-list", "bulleted-list"];
-export const CUSTOM_TYPES = ["name-variable", "tc-variable"];
+export const VOID_TYPES = ["name-variable", "tc-variable", "signer"];
+export const CHECKLIST_TYPE = "check-list-item";
 
 export const COLOR_OPTIONS = [
   { format: "colorized", color: "#000", text: "Black", isDefault: true },
@@ -16,13 +19,26 @@ export const FONT_OPTIONS = [
 export const defaultColorOption = COLOR_OPTIONS.find((opt) => opt.isDefault);
 export const defaultFontSize = FONT_OPTIONS.find((opt) => opt.isDefault);
 
+export const EMPTY_P = {
+  type: "paragraph",
+  children: [
+    {
+      type: "text",
+      text: "",
+      colorized: defaultColorOption.color,
+      fontSize: defaultFontSize.size,
+    },
+  ],
+};
+
 export const EMPTY_PAGE = {
   type: "page",
   padding: 50,
-  width: 764,
+  width: 794,
   height: 1123,
   borderColor: "#000",
   borderWidth: 1,
+  // key: uuidv4(),
   children: [
     {
       type: "paragraph",
@@ -52,6 +68,8 @@ export const BLOCK_FORMATS = [
 ];
 
 export const CUSTOM_FORMATS = [
-  { format: "name-variable", text: "Ad Soyad" },
-  { format: "tc-variable", text: "Tc Kimlik No" },
+  { format: "name-variable", text: "Ad Soyad", attribute: "name" },
+  { format: "tc-variable", text: "Tc Kimlik No", attribute: "tc" },
 ];
+
+export const SIGNER_FORMATS = [{ format: "signer", text: "İmzacı Alanı" }];

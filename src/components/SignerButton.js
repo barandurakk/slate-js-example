@@ -1,10 +1,9 @@
 import React from "react";
 import { useSlateStatic } from "slate-react";
-import { insertVariable, toggleMark } from "./utils";
+import { insertSigner, insertVariable, toggleMark } from "./utils";
 
-const VariableButton = ({ format, text, attribute }) => {
+const SignerButton = ({ format, text }) => {
   const editor = useSlateStatic();
-  console.log(text);
 
   return (
     <button
@@ -14,7 +13,7 @@ const VariableButton = ({ format, text, attribute }) => {
       }}
       onMouseDown={(e) => {
         e.preventDefault();
-        insertVariable(editor, format, text, attribute);
+        insertSigner(editor, format);
       }}
     >
       {text}
@@ -22,4 +21,4 @@ const VariableButton = ({ format, text, attribute }) => {
   );
 };
 
-export default VariableButton;
+export default SignerButton;

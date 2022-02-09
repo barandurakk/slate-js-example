@@ -32,6 +32,10 @@ export const withPages = (editor) => {
       return normalizeNode(entry);
     }
 
+    if (node.type === true) {
+      debugger;
+    }
+
     if (Element.isElement(node)) {
       // if the node is Page
       if (node.type === "page") {
@@ -134,13 +138,13 @@ const computeRun = (editor) => {
         empytHeiht = empytHeiht - childHeight;
         const toPath = path.concat([pageNode.children.length]);
 
-        riseElementToPrevPage(editor, index, nextPagePath, toPath);
+        // riseElementToPrevPage(editor, index, nextPagePath, toPath);
         // if move done, this page is empty, remove this page
-        if (index === nextPageChildren.length - 1) {
-          Transforms.removeNodes(editor, {
-            at: nextPagePath,
-          });
-        }
+        // if (index === nextPageChildren.length - 1) {
+        //   Transforms.removeNodes(editor, {
+        //     at: nextPagePath,
+        //   });
+        // }
       }
     }
   }

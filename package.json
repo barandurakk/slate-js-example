@@ -12,6 +12,7 @@
     "react-scripts": "5.0.0",
     "slate": "^0.72.8",
     "slate-react": "^0.72.8",
+    "uuid": "^8.3.2",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

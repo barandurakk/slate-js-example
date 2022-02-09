@@ -1,8 +1,16 @@
 import _ from "lodash";
-import { Editor, Transforms, Text, Element } from "slate";
+import { Editor, Transforms, Text, Element, Point, Range } from "slate";
 import { Element as SlateElement } from "slate";
 import { ReactEditor } from "slate-react";
-import { CUSTOM_TYPES, LIST_TYPES, COLOR_OPTIONS, FONT_OPTIONS, EMPTY_PAGE } from "./types";
+import {
+  LIST_TYPES,
+  COLOR_OPTIONS,
+  FONT_OPTIONS,
+  EMPTY_PAGE,
+  VOID_TYPES,
+  CHECKLIST_TYPE,
+  EMPTY_P,
+} from "./types";
 
 export const isMarkActive = (editor, format) => {
   const marks = Editor.marks(editor);
@@ -176,7 +184,7 @@ export const removeMarkFromVariable = (editor, path, format, node) => {
   );
 };
 
-export const insertVariable = (editor, format, text) => {
+export const insertVariable = (editor, format, text, attribute) => {
   const marks = Editor.marks(editor);
   const nodeText = { text: text };
 
@@ -187,13 +195,14 @@ export const insertVariable = (editor, format, text) => {
     isVariable: true,
     data: {
       placeholder: text,
+      attribute,
     },
     styles: {
       ...(!_.isEmpty(marks) && {
         text: { ...marks },
       }),
       container: {
-        backgroundColor: editor.format === "tc-variable" ? "blue" : "red",
+        backgroundColor: format === "tc-variable" ? "blue" : "red",
       },
     },
     children: [nodeText],
@@ -208,15 +217,85 @@ export const insertVariable = (editor, format, text) => {
   });
 };
 
-export const withVariables = (editor) => {
+export const insertPage = (editor) => {
+  Transforms.insertNodes(editor, EMPTY_P, { at: [editor.children.length] });
+
+  Transforms.wrapNodes(editor, EMPTY_PAGE, {
+    at: [editor.children.length - 1],
+  });
+};
+
+export const insertSigner = (editor, format) => {
+  const nodeText = { text: "" };
+
+  const voidNode = {
+    type: format,
+    isVoid: true,
+    isInline: true,
+    isSigner: true,
+    width: 692 / 4,
+    height: 50,
+    children: [nodeText],
+  };
+
+  Transforms.insertNodes(editor, voidNode);
+  Transforms.move(editor);
+};
+
+export const insertChecklist = (editor, format) => {
+  const checkList = {
+    type: "check-list-item",
+    isCheckList: true,
+    checked: false,
+    children: [{ text: "Buraya yazınız..." }],
+  };
+
+  Transforms.insertNodes(editor, checkList);
+};
+
+export const withCustomVoids = (editor) => {
   const { isVoid, isInline } = editor;
 
   editor.isVoid = (element) => {
-    return CUSTOM_TYPES.includes(element.type) ? true : isVoid(element);
+    return VOID_TYPES.includes(element.type) ? true : isVoid(element);
   };
 
   editor.isInline = (element) => {
-    return CUSTOM_TYPES.includes(element.type) ? true : isInline(element);
+    return VOID_TYPES.includes(element.type) ? true : isInline(element);
+  };
+
+  return editor;
+};
+
+export const withChecklists = (editor) => {
+  const { deleteBackward } = editor;
+
+  editor.deleteBackward = (...args) => {
+    const { selection } = editor;
+
+    if (selection && Range.isCollapsed(selection)) {
+      const [match] = Editor.nodes(editor, {
+        match: (n) => !Editor.isEditor(n) && SlateElement.isElement(n) && n.type === CHECKLIST_TYPE,
+      });
+
+      if (match) {
+        const [, path] = match;
+        const start = Editor.start(editor, path);
+
+        if (Point.equals(selection.anchor, start)) {
+          const newProperties = {
+            type: "paragraph",
+          };
+          Transforms.setNodes(editor, newProperties, {
+            match: (n) =>
+              !Editor.isEditor(n) && SlateElement.isElement(n) && n.type === CHECKLIST_TYPE,
+          });
+          return;
+        }
+      }
+    }
+
+    deleteBackward(...args);
   };
 
   return editor;
@@ -232,6 +311,7 @@ export const setDefaultMarks = (editor, node, path) => {
     Transforms.setNodes(
       editor,
       {
+        type: "text",
         [defaultColorOption.format]: defaultColorOption.color,
         [defaultFontSize.format]: defaultFontSize.size,
       },

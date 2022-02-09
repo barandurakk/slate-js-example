@@ -1,4 +1,6 @@
 import React from "react";
+import CheckListItemElement from "./CheckListItem";
+import Signer from "./Signer";
 import { COLOR_OPTIONS, EMPTY_PAGE, FONT_OPTIONS } from "./types";
 import Variable from "./Variable";
 
@@ -13,7 +15,13 @@ const Element = (props) => {
     return <Variable {...props} />;
   }
 
+  if (element.type === "signer") {
+    return <Signer {...props} />;
+  }
+
   switch (element.type) {
+    case "check-list-item":
+      return <CheckListItemElement {...props} />;
     case "bulleted-list":
       childrenNode = (
         <ul style={{ margin: 0, fontSize: defaultFontSize.size, color: defaultColorOption.color }}>
