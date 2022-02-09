@@ -11,7 +11,6 @@ const Variable = (props) => {
   useEffect(() => {
     if (selected && focused) {
       const elementsMarks = props.element.styles.text;
-
       if (elementsMarks)
         Object.keys(elementsMarks).map((mark) => {
           if (mark === "fontSize" || mark === "colorized")

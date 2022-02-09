@@ -1,87 +1,16 @@
 import _ from "lodash";
-import { Editor, Transforms, Text, Element } from "slate";
+import { Editor, Transforms, Text, Element, Point, Range } from "slate";
 import { Element as SlateElement } from "slate";
 import { ReactEditor } from "slate-react";
-import { CUSTOM_TYPES, LIST_TYPES, COLOR_OPTIONS, FONT_OPTIONS, EMPTY_PAGE } from "./types";
-
-export const withPages = (editor) => {
-  const { normalizeNode } = editor;
-
-  editor.normalizeNode = (entry) => {
-    const [node, path] = entry;
-
-    if (Text.isText(node)) {
-      setDefaultMarks(editor, node, path);
-      return normalizeNode(entry);
-    }
-
-    if (Element.isElement(node)) {
-      // if the node is Page
-      if (node.type === "page") {
-        //setPages atrributes for backend
-        let PageNode;
-        //afaik pageNode if inserted as new page is not available here as a dom node because it hasnt rendered yet
-        try {
-          PageNode = ReactEditor.toDOMNode(editor, node);
-        } catch (e) {
-          return;
-          // return normalizeNode(entry)
-        }
-
-        const style = window.getComputedStyle(PageNode);
-
-        const computedHeight = PageNode.offsetHeight;
-        const padding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
-
-        let pageHeight = computedHeight - padding;
-
-        let CurrentpageHeight = 0;
-
-        const children = Array.from(PageNode.children);
-        // debugger;
-        children.forEach((child) => {
-          const childStyles = window.getComputedStyle(child);
-          const computedChildHeight = parseFloat(child.clientHeight);
-          const childMargin =
-            parseFloat(childStyles.marginTop) + parseFloat(childStyles.marginBottom);
-          const childPadding =
-            parseFloat(childStyles.paddingBottom) + parseFloat(childStyles.paddingTop);
-          const childBorder =
-            parseFloat(childStyles.borderLeftWidth) +
-            parseFloat(childStyles.borderRightWidth) +
-            parseFloat(childStyles.borderTopWidth) +
-            parseFloat(childStyles.borderBottomWidth);
-
-          const childHeight = computedChildHeight + childMargin + childPadding + childBorder;
-
-          CurrentpageHeight = CurrentpageHeight + childHeight;
-          // debugger;
-          if (CurrentpageHeight > pageHeight) {
-            // debugger;
-            const pageNo = editor.selection.anchor.path[0];
-            Transforms.liftNodes(editor, {
-              at: [pageNo, editor.children[pageNo].children.length - 1],
-            });
-            Transforms.splitNodes(editor, { at: [pageNo + 1] });
-
-            //if there is already page after current, moveNode
-            if (editor.children[pageNo + 2] && editor.children[pageNo + 2].type === "page") {
-              Transforms.moveNodes(editor, { at: [pageNo + 1], to: [pageNo + 2, 0] });
-            } else {
-              Transforms.wrapNodes(editor, EMPTY_PAGE, {
-                at: [pageNo + 1],
-              });
-            }
-          }
-        });
-      }
-    }
-
-    // Fall back to the original `normalizeNode` to enforce other constraints.
-    return normalizeNode(entry);
-  };
-  return editor;
-};
+import {
+  LIST_TYPES,
+  COLOR_OPTIONS,
+  FONT_OPTIONS,
+  EMPTY_PAGE,
+  VOID_TYPES,
+  CHECKLIST_TYPE,
+  EMPTY_P,
+} from "./types";
 
 export const isMarkActive = (editor, format) => {
   const marks = Editor.marks(editor);
@@ -255,7 +184,7 @@ export const removeMarkFromVariable = (editor, path, format, node) => {
   );
 };
 
-export const insertVariable = (editor, format, text) => {
+export const insertVariable = (editor, format, text, attribute) => {
   const marks = Editor.marks(editor);
   const nodeText = { text: text };
 
@@ -266,13 +195,14 @@ export const insertVariable = (editor, format, text) => {
     isVariable: true,
     data: {
       placeholder: text,
+      attribute,
     },
     styles: {
       ...(!_.isEmpty(marks) && {
         text: { ...marks },
       }),
       container: {
-        backgroundColor: editor.format === "tc-variable" ? "blue" : "red",
+        backgroundColor: format === "tc-variable" ? "blue" : "red",
       },
     },
     children: [nodeText],
@@ -287,15 +217,85 @@ export const insertVariable = (editor, format, text) => {
   });
 };
 
-export const withVariables = (editor) => {
+export const insertPage = (editor) => {
+  Transforms.insertNodes(editor, EMPTY_P, { at: [editor.children.length] });
+
+  Transforms.wrapNodes(editor, EMPTY_PAGE, {
+    at: [editor.children.length - 1],
+  });
+};
+
+export const insertSigner = (editor, format) => {
+  const nodeText = { text: "" };
+
+  const voidNode = {
+    type: format,
+    isVoid: true,
+    isInline: true,
+    isSigner: true,
+    width: 692 / 4,
+    height: 50,
+    children: [nodeText],
+  };
+
+  Transforms.insertNodes(editor, voidNode);
+  Transforms.move(editor);
+};
+
+export const insertChecklist = (editor, format) => {
+  const checkList = {
+    type: "check-list-item",
+    isCheckList: true,
+    checked: false,
+    children: [{ text: "Buraya yazınız..." }],
+  };
+
+  Transforms.insertNodes(editor, checkList);
+};
+
+export const withCustomVoids = (editor) => {
   const { isVoid, isInline } = editor;
 
   editor.isVoid = (element) => {
-    return CUSTOM_TYPES.includes(element.type) ? true : isVoid(element);
+    return VOID_TYPES.includes(element.type) ? true : isVoid(element);
   };
 
   editor.isInline = (element) => {
-    return CUSTOM_TYPES.includes(element.type) ? true : isInline(element);
+    return VOID_TYPES.includes(element.type) ? true : isInline(element);
+  };
+
+  return editor;
+};
+
+export const withChecklists = (editor) => {
+  const { deleteBackward } = editor;
+
+  editor.deleteBackward = (...args) => {
+    const { selection } = editor;
+
+    if (selection && Range.isCollapsed(selection)) {
+      const [match] = Editor.nodes(editor, {
+        match: (n) => !Editor.isEditor(n) && SlateElement.isElement(n) && n.type === CHECKLIST_TYPE,
+      });
+
+      if (match) {
+        const [, path] = match;
+        const start = Editor.start(editor, path);
+
+        if (Point.equals(selection.anchor, start)) {
+          const newProperties = {
+            type: "paragraph",
+          };
+          Transforms.setNodes(editor, newProperties, {
+            match: (n) =>
+              !Editor.isEditor(n) && SlateElement.isElement(n) && n.type === CHECKLIST_TYPE,
+          });
+          return;
+        }
+      }
+    }
+
+    deleteBackward(...args);
   };
 
   return editor;
@@ -311,6 +311,7 @@ export const setDefaultMarks = (editor, node, path) => {
     Transforms.setNodes(
       editor,
       {
+        type: "text",
         [defaultColorOption.format]: defaultColorOption.color,
         [defaultFontSize.format]: defaultFontSize.size,
       },
